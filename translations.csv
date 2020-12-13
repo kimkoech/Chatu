@@ -1,0 +1,115 @@
+# references : https://www.python.org/ftp/python/doc/quick-ref.1.3.html
+# boolean values and operators and other return values
+True, Ukweli
+False, Uongo
+not, si
+or, ama
+and, na
+None, Hakuna
+# Numeric types and related operators: 
+abs, kabisa
+int, nambari
+long, ndefu
+float, nukta
+divmod, gawasalio
+pow, kipeo
+# operators on all sequences(tuples, lists, strings)
+len, urefu
+min, chini
+max, juu
+in, katika
+# operators on mutable sequences (lists)
+append, nyongeza
+count, hesabu
+index, faharisi
+insert, ingiza
+remove, toa
+reverse, geuza_nyuma
+sort, panga
+# operators on mappings  (dicts)
+del, futa
+items, vitu
+keys, vifunguo
+values, thamani
+has_key, iko_na_ufunguo
+# operators on file objects
+open, fungua
+close, funga
+fileno, failinambari
+flush, kuvuta
+isatty, niatty,
+read, soma
+readline, somalaini
+readlines, somamalaini
+seek, tafuta
+tell, ambia
+write, andika
+writelines, andikamalaini
+# statements
+pass, pita
+print, chapisha
+# control flow
+if, ikiwa
+elif, amaikiwa
+else, isipoweza
+while, wakati_ikiwa
+for, kwa
+break, vunja
+continue, endelea
+return, rudisha
+#exception statements
+try, jaribu
+except, isipokuwa
+//else, isipoweza
+raise, inua
+# name space statements
+import, agiza
+from, kutoka_kwa
+global, popote
+#function definition
+def, fafanua
+class, darasa
+#other built in functions
+//abs, kabisa
+apply, tumia
+callable, inaitika
+chr, herufi
+ord, badilisha_kutoka_herufi
+cmp, linganisha
+coerce, lazimisha
+compile, kusanya
+dir, saraka
+//divmod, gawasalio
+eval, tathmini
+filter, chuja
+//float, nukta
+//int, nambari
+//len, urefu
+//long, ndefu
+//max, juu
+//min, chini
+getattr, letasifa
+globals, zilizo_popote
+local, zilizo_mtaani
+hasattr, inasifa
+id, kitambulisho
+input, pembejeo
+map, ramani
+//open, fungua
+range, upana
+xrange, xupana
+raw_input, pembejeo_mbichi
+reduce, punguza
+reload, pakia_upya
+repr, repr
+setattr, wekasifa
+str, maandishi
+type, aina
+hash, hash
+hex, hex
+oct, oct
+vars, vars
+tuple, tuple
+# built in exception
+# others
+exit, toka
