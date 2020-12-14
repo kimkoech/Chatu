@@ -44,11 +44,7 @@ f = open(chatu_compile_file_name, "w+")
 f.write("#!/usr/bin/env python\n\n")
 # script
 f.writelines(converted)
-f.close
+f.close()
 
 # execute
-#print("python " + chatu_compile_file_name)
-
 os.system('python ' + chatu_compile_file_name)
-# execute
-#execfile(chatu_compile_file_name)
