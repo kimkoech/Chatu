@@ -1,23 +1,34 @@
-# English to swahili translations parser
+"""English <-> Swahili translations parser."""
+
+from __future__ import annotations
+
+import csv
 
 
-# takes a csv file returns a tuple of two dicts
-def gen_map(trans_csv_file):
-    # import csv
-    translations_csv = [line for line in open(trans_csv_file)]
-
-    #parse and create mapping
+def gen_map(trans_csv_file: str):
+    """Read translation CSV and return (swa_to_eng, eng_to_swa)."""
     swa_to_eng = {}
     eng_to_swa = {}
-    for line in translations_csv:
-        if ("#" in line) or("//" in line) or ("\n" == line):
-            pass #skip
-        else:
-            english = line.split(',')[0].strip()
-            swahili = line.split(',')[1].strip()
+
+    with open(trans_csv_file, newline="", encoding="utf-8") as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            if not row:
+                continue
+
+            first_cell = row[0].strip() if row[0] else ""
+            if not first_cell or first_cell.startswith("#") or first_cell.startswith("//"):
+                continue
+
+            if len(row) < 2:
+                continue
+
+            english = row[0].strip()
+            swahili = row[1].strip()
+            if not english or not swahili:
+                continue
+
             swa_to_eng[swahili] = english
             eng_to_swa[english] = swahili
-    
+
     return (swa_to_eng, eng_to_swa)
-
-
