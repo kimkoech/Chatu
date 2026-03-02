@@ -1,50 +1,107 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""Chatu CLI.
 
-# Program that takes a python file in swahili converts it to english and
-# executes it on the python intepretter
+Translate a `.ch` script written with Swahili keywords into Python and execute it.
+"""
+
+from __future__ import annotations
+
+import argparse
+import io
+import subprocess
+import sys
+import tokenize
+from pathlib import Path
 
 import translations as TRANS
-import argparse
-import os
 
-# command line handler
-parser = argparse.ArgumentParser(description='Takes a chatu file and executes it')
-parser.add_argument('chatu_script', metavar='.ch', type=str, nargs='+',
-                   help='chatu script script')
 
-args = parser.parse_args()
-# TODO: handle other inputs from chatu file
+DEFAULT_TRANSLATIONS_FILE = "translations.csv"
 
-# open and parse chatu script
-user_chatu_script = [line for line in open(args.chatu_script[0])]
 
-# generate translations
-swa_to_eng = TRANS.gen_map("translations.csv")[0]
+def translate_source(source: str, swa_to_eng: dict[str, str]) -> str:
+    """Translate Swahili identifiers in Python source code to English.
 
-# apply translations
-converted = []
-for line in user_chatu_script:
-    
-    # only alter uncommented lines
-    if "#" not in line:
-        for swa_key,eng_val in swa_to_eng.items():
-            line = line.replace(swa_key, eng_val)
-            
-    converted.append(line)
+    Uses Python tokenization so only identifier tokens are translated.
+    String literals, comments, and partial-word substrings are left intact.
+    """
+    translated_tokens = []
+    stream = io.StringIO(source)
 
-# write to compiled file and execute
+    for token in tokenize.generate_tokens(stream.readline):
+        tok_type, tok_string, start, end, line = token
 
-# name for compiled file
-_chatu_file_name = args.chatu_script[0].split("/")
-_chatu_file_name.reverse()
-chatu_compile_file_name = _chatu_file_name[0] + "c"
+        if tok_type == tokenize.NAME and tok_string in swa_to_eng:
+            tok_string = swa_to_eng[tok_string]
 
-f = open(chatu_compile_file_name, "w+")
-# header
-f.write("#!/usr/bin/env python\n\n")
-# script
-f.writelines(converted)
-f.close()
+        translated_tokens.append((tok_type, tok_string, start, end, line))
 
-# execute
-os.system('python ' + chatu_compile_file_name)
+    return tokenize.untokenize(translated_tokens)
+
+
+def compile_script(script_path: Path, translations_file: Path, output_path: Path | None = None) -> Path:
+    """Compile a Chatu script to a Python file and return compiled file path."""
+    if not script_path.exists():
+        raise FileNotFoundError(f"Script not found: {script_path}")
+    if not translations_file.exists():
+        raise FileNotFoundError(f"Translations file not found: {translations_file}")
+
+    swa_to_eng = TRANS.gen_map(str(translations_file))[0]
+    source = script_path.read_text(encoding="utf-8")
+    converted = translate_source(source, swa_to_eng)
+
+    compiled_path = output_path or script_path.with_name(f"{script_path.name}c")
+    compiled_path.write_text("#!/usr/bin/env python3\n\n" + converted, encoding="utf-8")
+    return compiled_path
+
+
+def execute_python_script(script_path: Path) -> int:
+    """Execute a Python script and return its exit code."""
+    result = subprocess.run([sys.executable, str(script_path)], check=False)
+    return result.returncode
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Translate and execute a Chatu (.ch) script")
+    parser.add_argument("chatu_script", type=Path, help="Path to .ch script")
+    parser.add_argument(
+        "-t",
+        "--translations",
+        default=DEFAULT_TRANSLATIONS_FILE,
+        type=Path,
+        help="Path to translations CSV file (default: translations.csv)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=None,
+        help="Path for compiled Python output (default: <script>.chc)",
+    )
+    parser.add_argument(
+        "--compile-only",
+        action="store_true",
+        help="Only compile the script; do not execute it",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        compiled_path = compile_script(args.chatu_script, args.translations, args.output)
+    except (FileNotFoundError, tokenize.TokenError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.compile_only:
+        print(f"Compiled: {compiled_path}")
+        return 0
+
+    return execute_python_script(compiled_path)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
